@@ -1,0 +1,38 @@
+#matrix-body
+{
+    width:90%;
+    margin-left: auto;
+    margin-right:auto;
+}
+h1
+{
+    text-align: center;
+}
+.matrix-room-container
+{
+text-align: center;
+display: grid;
+grid-template-columns: 1fr 1fr 1fr;
+grid-gap: 1em;
+}
+.matrix-room-summary
+{
+cursor:pointer;
+}
+.matrix-event
+{
+    padding-top: 15px;
+}
+.matrix-img
+{
+max-height: 300px;
+
+}
+
+blockquote
+{
+    color: grey;
+    padding-left: 15px;
+    border-left: 3px solid lightgrey;
+    margin-left: 0;
+}
