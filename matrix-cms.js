@@ -4,6 +4,7 @@ const homeserver = document.getElementById("matrix-body").getAttribute('data-hom
 const roomAlias = document.getElementById("matrix-body").getAttribute('data-roomAlias');
 var gallery = ( document.getElementById("matrix-body").getAttribute('data-gallery') === 'true' );
 var userFilteredOut = document.getElementById("matrix-body").getAttribute('data-userFilteredOut');
+var giveRoomAddress = document.getElementById("matrix-body").getAttribute('data-giveRoomAddress');
 var oldTimelineLength = 0;
 var imgWidth = 800;
 var imgHeight = 600;
@@ -117,7 +118,7 @@ function linkToRoomContent() {
     matrixBody.innerHTML = "";
     //switchDisplay();
     startRefresh();
-    matrixBody.innerHTML += "<a id='space-root-link' href>Retour à la liste des salons</a>";
+    matrixBody.innerHTML += "<a id='space-root-link' href>Retour à la liste des salons</a></br>";
     fetchMessagesInRoom("", this.getAttribute("data-room-id"))
 }
 
@@ -147,6 +148,7 @@ async function fetchMessagesInRoom(alias, idOfRoom) {
             client.peekInRoom(roomId).then(function(room) {
                 console.log( room );
                 var matrixBody = document.getElementById("matrix-body");
+                matrixBody.innerHTML += "<a class='room-link' href='https://matrix.to/#/"+ room.roomId +"'>Join on Matrix !</a>"
                 matrixBody.innerHTML += "<h1>" + room.name + "</h1>";
                 matrixBody.innerHTML += "<div id='matrix-container'></div>"
                 if ( hierarchy.rooms.length == 1 ) {
