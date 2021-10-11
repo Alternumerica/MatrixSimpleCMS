@@ -1,22 +1,49 @@
 document.addEventListener("DOMContentLoaded", (event) => {
 
-const homeserver = document.getElementById("matrix-body").getAttribute('data-homeserver') || "https://matrix.org"
-const roomAlias = document.getElementById("matrix-body").getAttribute('data-roomAlias');
-var gallery = ( document.getElementById("matrix-body").getAttribute('data-gallery') === 'true' );
-var userFilteredOut = document.getElementById("matrix-body").getAttribute('data-userFilteredOut');
-var giveRoomAddress = document.getElementById("matrix-body").getAttribute('data-giveRoomAddress');
+const matrixBody = document.getElementById("matrix-body");
+const userLang = navigator.language || navigator.userLanguage;
+const homeserver = matrixBody.getAttribute('data-homeserver') || "https://matrix.org"
+const roomAlias = matrixBody.getAttribute('data-roomAlias');
+var gallery = ( matrixBody.getAttribute('data-gallery') === 'true' );
+var userFilteredOut = matrixBody.getAttribute('data-userFilteredOut');
+var giveRoomAddress = matrixBody.getAttribute('data-giveRoomAddress') === "false" ? false : true;
+var displayDate = ( matrixBody.getAttribute('data-displayDate') === 'true');
 var oldTimelineLength = 0;
 var imgWidth = 800;
 var imgHeight = 600;
 var keepRefresh = 1;
 var urlForRooms = "https://matrix.to/#/"
+var spinner = document.createElement('div');
+spinner.classList.add("centered")
+spinner.innerHTML = '<i id="waitingspinner" class="fa fa-spinner fa-spin"></i>';
+const siteLang = userLang === 'fr' ? 'fr' : 'en';
+var string = {
+    en:
+        {
+            join_on_matrix: "Join the room on matrix"
+        },
+    fr:
+        {
+            join_on_matrix: "Retrouver le salon sur Matrix"
+        }
 
+}
 // function to stop refreshing page
+function insertAfter(newNode, referenceNode) {
+    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+}
+
 function cancelRefresh() {
     keepRefresh = 0;
     document.getElementById("waitingspinner").style.visibility = "hidden";
 }
 
+function giveTheDate(time){
+    let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    date = new Date(time);
+    return date.toLocaleString(userLang, options);
+
+}
 function startRefresh() {
     oldTimelineLength = 0;
     keepRefresh = 1;
@@ -50,6 +77,7 @@ function getContentFromEvent(client, message) {
     if ( message.event.sender === userFilteredOut ) return result;
     if ( message.event.type === "m.room.message" ) {
         result += "<div class='matrix-event'>";
+        if ( displayDate ) result += "<span class='matrix-date'>" + giveTheDate(message.localTimestamp) + "</span>";
         if ( message.event.content.msgtype === "m.image" ) {
             result += "<img class='matrix-img' src='"+ client.mxcUrlToHttp( message.event.content.url, 800, 600, "scale", false )  +"'>"
 
@@ -78,7 +106,6 @@ function getRoomInSpace(client, room) {
 }
 
 function addEventsToPage(client, room) {
-    console.log("oldTimeline: "+ oldTimelineLength + " ; new timeline: " + room.timeline.length);
     var matrixContainer = document.getElementById("matrix-container");
     matrixContainer.classList.add("matrix-event-container");
     if ( gallery ) matrixContainer.classList.add("matrix-gallery-container");
@@ -108,29 +135,26 @@ function getSpaceContent(client, hierarchy){
         roomsLinks[i].addEventListener('click', linkToRoomContent, false);
     }
 
-    console.log(hierarchy);
     cancelRefresh();
 
 }
 
 function linkToRoomContent() {
-    var matrixBody = document.getElementById("matrix-body");
     matrixBody.innerHTML = "";
-    //switchDisplay();
     startRefresh();
     matrixBody.innerHTML += "<a id='space-root-link' href>Retour à la liste des salons</a></br>";
     fetchMessagesInRoom("", this.getAttribute("data-room-id"))
 }
 
 function linkToRootSpace() {
-    var matrixBody = document.getElementById("matrix-body");
     matrixBody.innerHTML = "";
-    //switchDisplay();
     startRefresh();
     fetchMessagesInRoom(roomAlias);
 }
 
 async function fetchMessagesInRoom(alias, idOfRoom) {
+    insertAfter(spinner, matrixBody)
+
     const tmpClient = await matrixcs.createClient(homeserver);
 
     const { user_id, device_id, access_token } = await tmpClient.registerGuest();
@@ -147,9 +171,8 @@ async function fetchMessagesInRoom(alias, idOfRoom) {
         client.getRoomHierarchy(roomId).then(function(hierarchy) {
             client.peekInRoom(roomId).then(function(room) {
                 console.log( room );
-                var matrixBody = document.getElementById("matrix-body");
-                matrixBody.innerHTML += "<a class='room-link' href='https://matrix.to/#/"+ room.roomId +"'>Join on Matrix !</a>"
-                matrixBody.innerHTML += "<h1>" + room.name + "</h1>";
+                matrixBody.innerHTML += "<h1 class='matrix-body-title'>" + room.name + "</h1>";
+                if ( giveRoomAddress ) matrixBody.innerHTML += "<h2 class='matrix-body-title'><a class='room-link' href='https://matrix.to/#/"+ room.roomId +"'>" + string[siteLang]['join_on_matrix']+ "</a></h2>"
                 matrixBody.innerHTML += "<div id='matrix-container'></div>"
                 if ( hierarchy.rooms.length == 1 ) {
                     addEventsToPage(client, room);

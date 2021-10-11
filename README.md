@@ -15,3 +15,4 @@ attributes possible are following :
 - data-roomAlias: the alias of the room you want to display, the room history needs to be set as world_visible.
 - data-gallery: **boolean**, to activate the display of a gallery, to use a Matrix room as a photo gallery.
 - data-userFilteredOut: to prevent display of messages from a certain user.
+- data-giveRoomAddress: set to "false" to not display the address of the room beneath the title.

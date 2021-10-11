@@ -3,9 +3,13 @@
     margin-left: auto;
     margin-right:auto;
 }
-h1
+.matrix-body-title, .centered
 {
     text-align: center;
+}
+#waitingspinner
+{
+font-size: 48px;
 }
 .matrix-room-container
 {
@@ -24,6 +28,11 @@ border-radius: 2px;
 .matrix-event
 {
     padding-top: 15px;
+}
+.matrix-date
+{
+   font-size:.8em;
+   color: grey;
 }
 .matrix-img
 {
