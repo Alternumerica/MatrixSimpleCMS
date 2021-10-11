@@ -1,7 +1,9 @@
-const homeserver = document.currentScript.getAttribute('homeserver') || "https://matrix.org"
-const roomAlias = document.currentScript.getAttribute('roomAlias');
-var gallery = ( document.currentScript.getAttribute('gallery') === 'true' );
-var userFilteredOut = document.currentScript.getAttribute('userFilteredOut');
+document.addEventListener("DOMContentLoaded", (event) => {
+
+const homeserver = document.getElementById("matrix-body").getAttribute('data-homeserver') || "https://matrix.org"
+const roomAlias = document.getElementById("matrix-body").getAttribute('data-roomAlias');
+var gallery = ( document.getElementById("matrix-body").getAttribute('data-gallery') === 'true' );
+var userFilteredOut = document.getElementById("matrix-body").getAttribute('data-userFilteredOut');
 var oldTimelineLength = 0;
 var imgWidth = 800;
 var imgHeight = 600;
@@ -24,16 +26,6 @@ function switchDisplay(template) {
     let matrixContainer = document.getElementById("matrix-container");
     matrixContainer.classList.toggle("matrix-event-container");
     matrixContainer.classList.toggle("matrix-room-container");
-    /*switch(template){
-        case "space":
-            matrixContainer.classList.remove("matrix-event-container")
-            matrixContainer.classList.add("matrix-room-container")
-            break;
-        case "room":
-            matrixContainer.classList.remove("matrix-event-container")
-            matrixContainer.classList.add("matrix-room-container")
-            break;
-    }*/
 
 }
 
@@ -75,9 +67,11 @@ function getRoomInSpace(client, room) {
     //result += "<a href='"+ urlForRooms + room.canonical_alias +"'>";
     result += "<div class='matrix-room-summary' data-room-id='"+ room.room_id +"'>";
     result += "<img class='matrix-img' src='" + client.mxcUrlToHttp( room.avatar_url, 800, 600, "scale", false ) + "'>";
+    result += "<div class='matrix-summary'>";
     result += "<h3 class='matrix-title'>" + room.name + "</h3>"
     if ( room.topic ) result += "<p class='matrix-text'>" + room.topic + "</p>"
     result += "</div>";
+    result += "</div>"
     return result;
 
 }
@@ -86,6 +80,7 @@ function addEventsToPage(client, room) {
     console.log("oldTimeline: "+ oldTimelineLength + " ; new timeline: " + room.timeline.length);
     var matrixContainer = document.getElementById("matrix-container");
     matrixContainer.classList.add("matrix-event-container");
+    if ( gallery ) matrixContainer.classList.add("matrix-gallery-container");
     room.timeline.slice( 0, room.timeline.length - oldTimelineLength ).reverse().forEach( (message) => {
             matrixContainer.innerHTML += getContentFromEvent(client, message);
     });
@@ -103,7 +98,7 @@ function addEventsToPage(client, room) {
 function getSpaceContent(client, hierarchy){
     var matrixContainer= document.getElementById("matrix-container");
         matrixContainer.classList.add("matrix-room-container");
-        hierarchy.rooms.forEach( (room) => {
+        hierarchy.rooms.slice().reverse().forEach( (room) => {
         matrixContainer.innerHTML += getRoomInSpace(client, room);
     });
 
@@ -179,3 +174,5 @@ async function fetchMessagesInRoom(alias, idOfRoom) {
 
 
 fetchMessagesInRoom(roomAlias);
+
+});
