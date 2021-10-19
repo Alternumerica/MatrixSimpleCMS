@@ -1,16 +1,19 @@
 document.addEventListener("DOMContentLoaded", (event) => {
 
 const matrixBody = document.getElementById("matrix-body");
+if ( !matrixBody ) return 0;
 const userLang = navigator.language || navigator.userLanguage;
 const homeserver = matrixBody.getAttribute('data-homeserver') || "https://matrix.org"
 const roomAlias = matrixBody.getAttribute('data-roomAlias');
+const roomMainID = matrixBody.getAttribute('data-roomID');
 var gallery = ( matrixBody.getAttribute('data-gallery') === 'true' );
 var userFilteredOut = matrixBody.getAttribute('data-userFilteredOut');
 var giveRoomAddress = matrixBody.getAttribute('data-giveRoomAddress') === "false" ? false : true;
 var displayDate = ( matrixBody.getAttribute('data-displayDate') === 'true');
+var hideTitle = ( matrixBody.getAttribute('data-hideTitle') === 'true');
+var imgHeight = matrixBody.getAttribute('data-imgwidth') || 300;
 var oldTimelineLength = 0;
 var imgWidth = 800;
-var imgHeight = 600;
 var keepRefresh = 1;
 var urlForRooms = "https://matrix.to/#/"
 var spinner = document.createElement('div');
@@ -79,10 +82,10 @@ function getContentFromEvent(client, message) {
         result += "<div class='matrix-event'>";
         if ( displayDate ) result += "<span class='matrix-date'>" + giveTheDate(message.localTimestamp) + "</span>";
         if ( message.event.content.msgtype === "m.image" ) {
-            result += "<img class='matrix-img' src='"+ client.mxcUrlToHttp( message.event.content.url, 800, 600, "scale", false )  +"'>"
+            result += "<img style='height:"+ imgHeight + "px' class='matrix-img' src='"+ client.mxcUrlToHttp( message.event.content.url, imgWidth, imgHeight, "scale", false )  +"'>"
 
         } else {
-            if ( !gallery ) result += "<p class='matrix-text'>" + ( message.event.content.formatted_body || message.event.content.body ) + "</p>";
+            if ( message.event.content.body && !gallery && !message.event.content["m.new_content"] ) result += "<p class='matrix-text'>" + ( message.event.content.formatted_body || message.event.content.body ) + "</p>";
         }
         result += "</div>";
     }
@@ -95,7 +98,7 @@ function getRoomInSpace(client, room) {
     if ( room.room_type === "m.space" ) return result;
     //result += "<a href='"+ urlForRooms + room.canonical_alias +"'>";
     result += "<div class='matrix-room-summary' data-room-id='"+ room.room_id +"'>";
-    result += "<img class='matrix-img' src='" + client.mxcUrlToHttp( room.avatar_url, 800, 600, "scale", false ) + "'>";
+    result += "<img class='matrix-img' style='height:"+ imgHeight + "px' src='" + client.mxcUrlToHttp( room.avatar_url, imgWidth, imgHeight, "scale", false ) + "'>";
     result += "<div class='matrix-summary'>";
     result += "<h3 class='matrix-title'>" + room.name + "</h3>"
     if ( room.topic ) result += "<p class='matrix-text'>" + room.topic + "</p>"
@@ -171,7 +174,7 @@ async function fetchMessagesInRoom(alias, idOfRoom) {
         client.getRoomHierarchy(roomId).then(function(hierarchy) {
             client.peekInRoom(roomId).then(function(room) {
                 console.log( room );
-                matrixBody.innerHTML += "<h1 class='matrix-body-title'>" + room.name + "</h1>";
+                if ( !hideTitle ) matrixBody.innerHTML += "<h1 class='matrix-body-title'>" + room.name + "</h1>";
                 if ( giveRoomAddress ) matrixBody.innerHTML += "<h2 class='matrix-body-title'><a class='room-link' href='https://matrix.to/#/"+ room.roomId +"'>" + string[siteLang]['join_on_matrix']+ "</a></h2>"
                 matrixBody.innerHTML += "<div id='matrix-container'></div>"
                 if ( hierarchy.rooms.length == 1 ) {
@@ -197,7 +200,7 @@ async function fetchMessagesInRoom(alias, idOfRoom) {
 
 }
 
-
-fetchMessagesInRoom(roomAlias);
+if ( roomMainID ) fetchMessagesInRoom("", roomMainID);
+else fetchMessagesInRoom(roomAlias);
 
 });
