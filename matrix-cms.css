@@ -29,6 +29,9 @@ border-radius: 2px;
 .matrix-event
 {
     padding-top: 15px;
+    border-bottom-style: solid;
+    border-bottom-color: white;
+    padding-bottom: 30px;
 }
 .matrix-date
 {
@@ -62,6 +65,8 @@ object-fit: cover;
 .matrix-gallery-container .matrix-event
 {
   padding-top: 0;
+    border-bottom: none;
+    padding-bottom: initial;
 }
 .matrix-gallery-container .matrix-img
 {
