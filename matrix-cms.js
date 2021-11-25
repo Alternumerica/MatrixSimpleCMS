@@ -67,7 +67,8 @@ function hasScrollBar() {
 }
 
 function populateWithScroll(client, room) {
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+    var elDistanceToTop = window.pageYOffset + document.getElementById("waitingspinner").getBoundingClientRect().top;
+    if (window.innerHeight + window.scrollY >= elDistanceToTop) {
         client.scrollback(room).then(function(newRoom) {
             addEventsToPage(client, newRoom);
         });
